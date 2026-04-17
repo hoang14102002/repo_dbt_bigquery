@@ -1,4 +1,13 @@
-{{ config(materialized='table') }}
+{{ config(
+    materialized='incremental',
+    incremental_strategy='merge',
+    unique_key=['order_id', 'product_id', 'discount'],
+    partition_by={
+        "field": "order_date",
+        "data_type": "date"
+    },
+    cluster_by=['order_id', 'product_id']
+) }}
 
 select 
     order_id,
@@ -7,8 +16,16 @@ select
     product_id,
     sum(quantity) as quantity,
     sum(sales) as sales,
-    discount as discount,
+    discount,
     sum(profit) as profit,
     sum(shipping_cost) as shipping_cost
 from {{ ref('stg_orders') }}
-group by order_id,product_id, discount
+
+{% if is_incremental() %}
+where order_date >= (
+    select date_sub(max(order_date), interval 1 day)
+    from {{ this }}
+)
+{% endif %}
+
+group by order_id, product_id, discount
