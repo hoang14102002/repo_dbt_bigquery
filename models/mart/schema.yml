@@ -1,0 +1,45 @@
+version: 2
+
+models:
+    - name: fact_sales
+      columns:
+          - name: order_id
+            tests:
+                - not_null
+          - name: product_id
+            tests: 
+                - not_null
+                
+    - name: mart_sales_by_category
+      columns:
+          - name: sub_category
+            description: "The primary key for this table"
+            tests:
+                - unique
+                - not_null
+
+    - name: mart_sales_by_region
+      columns:
+          - name: region
+            description: "The primary key for this table"
+            tests:
+                - unique
+                - not_null
+
+    - name: mart_sales_daily
+      columns:
+          - name: order_date
+            description: "The primary key for this table"
+            tests:
+                - unique
+                - not_null
+    
+    - name: mart_top_customer
+      columns:
+          - name: customer_id
+            description: "The primary key for this table"
+            tests:
+                - unique
+                - not_null
+    
+     

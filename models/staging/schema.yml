@@ -1,0 +1,11 @@
+version: 2
+
+sources:
+  - name: raw
+    database: global-sale-project-493507
+    schema: raw_data
+    tables:
+      - name: sales_raw_data
+models:
+  - name: stg_orders
+    description: "Staging table for order"
