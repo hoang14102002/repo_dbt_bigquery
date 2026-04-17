@@ -2,6 +2,6 @@
 
 select distinct
     customer_id,
-    ustomer_name,
+    customer_name,
     segment
 from {{ref('stg_orders')}}
