@@ -2,23 +2,83 @@ version: 2
 
 models:
     - name: int_orders
+      description: "Fact table aggregated at order level from stg_orders"
       columns:
-          - name: order_id
-            description: "The primary key for this table"
-            tests:
-                - unique
-                - not_null
+      - name: order_id
+        description: "Unique identifier for each order"
+        tests:
+          - not_null
+          - unique
+      - name: order_date
+        description: "Earliest order date for the order_id"
+        tests:
+          - not_null
+      - name: ship_date
+        description: "Latest ship date for the order_id"
+      - name: customer_id
+        description: "Customer who placed the order"
+        tests: 
+          - not_null
+      - name: ship_mode
+        description: "Shipping mode used for the order"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Standard Class', 'Same Day', 'First Class','Second Class']
+      - name: order_priority
+        description: "Priority level of the order"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Medium', 'High', 'Critical','Low']
+      - name: delivery_days
+        description: "Number of days between order_date and ship_date"
                 
-    - name: int_orders_detail
+    - name: int_orders_detail 
+      description: "Intermediate model aggregating order data by order_id, product_id, and discount"
       columns:
-          - name: order_id
-            description: "define unique order"
-            tests:
-                - not_null
-          - name: product_id
-            description: "define what product customer buy in a order, order_id + product_id is unique key"
-            tests:
-                - not_null
+      - name: order_id
+        description: "Unique identifier for each order"
+        tests:
+          - not_null
+      - name: product_id
+        description: "Unique identifier for each product"
+        tests:
+          - not_null
+      - name: order_date
+        description: "Earliest order date within the order group"
+        test: 
+          - not_null
+      - name: ship_date
+        description: "Latest shipping date within the order group"
+      - name: customer_id
+        description: "Identifier of the customer"
+        tests: 
+          - not_null
+      - name: region
+        description: "Geographical region of the order"
+      - name: ship_mode
+        description: "Shipping method used for the order"
+        tests:
+          - not_null
+      - name: order_priority
+        description: "Priority level of the order"
+        test:
+          - not_null
+      - name: delivery_days
+        description: "Number of days between order_date and ship_date"
+      - name: quantity
+        description: "Total quantity of products in the group"
+        tests:
+          - not_null
+      - name: sales
+        description: "Total sales amount"
+      - name: discount
+        description: "Discount rate applied to the order group"
+      - name: profit
+        description: "Total profit generated"
+      - name: shipping_cost
+        description: "Total shipping cost"
 
     - name: int_dim_customer
       columns:
@@ -26,6 +86,12 @@ models:
             description: "The primary key for this table"
             tests:
                 - unique
+                - not_null
+          - name: customer_name 
+            description: "Name of that customer"
+          - name: segment
+            description: "Segment class of customer"
+            tests: 
                 - not_null
 
     - name: int_dim_product
@@ -35,6 +101,29 @@ models:
             tests:
                 - unique
                 - not_null
-
+          - name: product_name
+            description: "Name of product"
+          - name: sub_category
+            description: "Sub category of product"
+            test:
+              - not_null
+          - name: category
+            description: "Category of product"
+            test:
+              - not_null
     
-     
+    - name: int_dim_location
+      description: "Intermediate dimension table containing distinct location information extracted from orders"
+      columns:
+      - name: postal_code
+        description: "Postal code of the location"
+      - name: city
+        description: "City name"
+      - name: state
+        description: "State or province name"
+      - name: country
+        description: "Country name"
+      - name: region
+        description: "Geographical region"
+      - name: market
+        description: "Market classification of the location"
