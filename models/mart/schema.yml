@@ -1,15 +1,100 @@
 version: 2
 
 models:
+    - name: dim_customer
+      columns:
+          - name: customer_id
+            description: "The primary key for this table"
+            tests:
+                - not_null
+                - unique
+          - name: customer_name
+            description: "Name of customer"
+          - name: segment
+            description: "Segment of customer"
+            tests: 
+                - not_null
+                - accepted_values:
+                    values: ['Consumer', 'Corporate','Home Office']
+
+    - name: dim_product
+      columns:
+          - name: product_id
+            description: "The primary key for this table"
+            tests:
+                - not_null
+                - unique
+          - name: product_name
+            description: "Name of product"
+          - name: category
+            test: 
+                - not_null
+                - accepted_values:
+                    values: ['Furniture','Office Supplies','Technology']
+
+          - name: sub_category
+            test: 
+                - not_null
+                - accepted_values:
+                    values: ['Bookcases','Chairs','Furnishings','Tables','Appliances','Art','Binders','Envelopes','Fasteners','Labels',
+                              'Paper','Storage','Supplies','Accessories','Copiers','Machines','Phones']
+
+    - name: dim_location 
+      columns: 
+          - name: region
+          - name: market 
+            test: 
+                - not_null
+                - accepted_values: 
+                    values: ['Africa','Asia Pacific','Europe','LATAM','USA']
+              
+    - name: dim_date 
+      columns: 
+          - name: date
+            test:
+                - not_null
+                - unique
+          - name: year
+          - name: month 
+          - name: day
+          - name: day_of_week
+          - name: day_name
+          - name: week_of_year
+          - name: quater
+          - name: is_weekend
+            tests:
+              - dbt_utils.expression_is_true:
+                expression: >
+                  (day_name in ('Saturday','Sunday') and is_weekend = true)
+                  or
+                  (day_name not in ('Saturday','Sunday') and is_weekend = false)
+
     - name: fact_sales
       columns:
           - name: order_id
             tests:
                 - not_null
+          - name: order_date 
+          - name: customer_id
           - name: product_id
             tests: 
                 - not_null
-                
+          - name: quantity
+            test:
+              - dbt_utils.expression_is_true:
+                expression: "quantity > 0"
+          - name: sales
+          - name: discount
+            description: "Discount rate"
+            test:
+              - dbt_utils.expression_is_true:
+                expression: "discount between 0 and 1"
+          - name: profit
+          - name: shipping_cost
+            test:
+              - dbt_utils.expression_is_true:
+                expression: "shipping_cost >= 0"
+       
     - name: mart_sales_by_category
       columns:
           - name: sub_category
@@ -17,6 +102,20 @@ models:
             tests:
                 - unique
                 - not_null
+          - name: category
+            test:
+                - not_null
+                - accepted_values:
+                    values: ['Furniture','Office Supplies','Technology']
+          - name: total_sales
+            test:
+              - dbt_utils.expression:
+                expression: "total_sales >= 0"
+          - name: total_profit
+          - name: total_orders
+            test: 
+              - dbt_utils.expression:
+                expression: "total_orders >= 0"
 
     - name: mart_sales_by_region
       columns:
@@ -25,6 +124,15 @@ models:
             tests:
                 - unique
                 - not_null
+          - name: total_sales
+            test:
+              - dbt_utils.expression:
+                expression: "total_sales >= 0"
+          - name: total_profit
+          - name: total_orders
+            test: 
+              - dbt_utils.expression:
+                expression: "total_orders >= 0"
 
     - name: mart_sales_daily
       columns:
@@ -33,7 +141,20 @@ models:
             tests:
                 - unique
                 - not_null
-    
+          - name: total_sales
+            test:
+              - dbt_utils.expression:
+                expression: "total_sales >= 0"
+          - name: total_profit
+          - name: total_orders
+            test: 
+              - dbt_utils.expression:
+                expression: "total_orders >= 0"
+          - name: total_quantity
+            test: 
+              - dbt_utils.expression:
+                expression: "total_quantity >= 0"
+
     - name: mart_top_customer
       columns:
           - name: customer_id
@@ -41,5 +162,13 @@ models:
             tests:
                 - unique
                 - not_null
-    
+          - name: total_sales
+            test:
+              - dbt_utils.expression:
+                expression: "total_sales >= 0"
+          - name: total_profit
+          - name: total_orders
+            test: 
+              - dbt_utils.expression:
+                expression: "total_orders >= 0"
      
